@@ -422,7 +422,7 @@ export default function Home() {
       {/* Hero Section */}
       <section className="hero">
         <div className="container hero-grid">
-          <div className="hero-card brutal-card">
+          <div className="hero-card brutal-card" data-aos="fade-right">
             <span className="eyebrow">Gen-Z college strategy</span>
             <h1 className="hero-headline">
               UNIMATCH:
@@ -439,7 +439,7 @@ export default function Home() {
             </div>
           </div>
 
-          <aside className="insight-panel">
+          <aside className="insight-panel" data-aos="fade-left">
             <p className="panel-title">Chiến lược 30 · 50 · 20</p>
             <div className="strategy-stack">
               <div className="strategy-card">
@@ -465,7 +465,7 @@ export default function Home() {
       {/* Smart Match Section */}
       <section className="section" id="match">
         <div className="container">
-          <div className="section-header">
+          <div className="section-header" data-aos="fade-up">
             <div>
               <span className="section-badge">Smart Match</span>
               <h2>Tạo chiến lược nguyện vọng</h2>
@@ -473,7 +473,7 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="smart-card">
+          <div className="smart-card" data-aos="fade-up" data-aos-delay="100">
             <div className="steps">
               <div className={`step-tab ${step === 1 ? 'is-active' : ''} ${step > 1 ? 'is-done' : ''}`}><span className="step-number">1</span> Tổ hợp</div>
               <div className={`step-tab ${step === 2 ? 'is-active' : ''} ${step > 2 ? 'is-done' : ''}`}><span className="step-number">2</span> Điểm</div>
@@ -749,7 +749,7 @@ export default function Home() {
       {/* About Section */}
       <section className="section" id="about">
         <div className="container">
-          <div className="section-header">
+          <div className="section-header" data-aos="fade-up">
             <div>
               <span className="section-badge">Vì sao khác?</span>
               <h2>Không corporate. Có cơ sở.</h2>
@@ -757,17 +757,17 @@ export default function Home() {
             </div>
           </div>
           <div className="trend-grid">
-            <article className="tool-card trend-card">
+            <article className="tool-card trend-card" data-aos="fade-up" data-aos-delay="100">
               <span className="pill safe">01</span>
               <h3>30/50/20 split</h3>
               <p>Ma trận 3 khối bất đối xứng — không nhồi một list dài vô nghĩa.</p>
             </article>
-            <article className="tool-card trend-card">
+            <article className="tool-card trend-card" data-aos="fade-up" data-aos-delay="200">
               <span className="pill fit">02</span>
               <h3>Minh bạch</h3>
               <p>Mỗi gợi ý có học phí, benchmark score và text giải thích chi tiết.</p>
             </article>
-            <article className="tool-card trend-card">
+            <article className="tool-card trend-card" data-aos="fade-up" data-aos-delay="300">
               <span className="pill reach">03</span>
               <h3>Supabase-first</h3>
               <p>Dữ liệu được lưu trữ tập trung trên PostgreSQL đám mây, bảo mật và đồng bộ.</p>

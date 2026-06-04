@@ -29,15 +29,19 @@ export default function DynamicBackground() {
       mouse.y = -1000;
     };
 
+    let resizeTimeout;
     const handleResize = () => {
-      if (!canvas) return;
-      width = canvas.width = window.innerWidth;
-      height = canvas.height = window.innerHeight;
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(() => {
+        if (!canvas) return;
+        width = canvas.width = window.innerWidth;
+        height = canvas.height = window.innerHeight;
+      }, 150);
     };
 
-    window.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseleave', handleMouseLeave);
-    window.addEventListener('resize', handleResize);
+    window.addEventListener('mousemove', handleMouseMove, { passive: true });
+    document.addEventListener('mouseleave', handleMouseLeave, { passive: true });
+    window.addEventListener('resize', handleResize, { passive: true });
 
     class Shape {
       constructor() {
@@ -63,8 +67,9 @@ export default function DynamicBackground() {
 
         const dx = mouse.x - this.x;
         const dy = mouse.y - this.y;
-        const dist = Math.hypot(dx, dy);
-        if (dist < 150) {
+        const distSq = dx * dx + dy * dy;
+        if (distSq < 22500) { // 150^2
+          const dist = Math.sqrt(distSq);
           const force = (150 - dist) / 150;
           const angle = Math.atan2(dy, dx);
           this.x -= Math.cos(angle) * force * 1.8;
@@ -115,26 +120,30 @@ export default function DynamicBackground() {
       }
     }
 
-    const shapeCount = Math.min(25, Math.floor((width * height) / 45000));
+    // Giảm số lượng hình vẽ tối đa trên màn hình để tăng FPS
+    const shapeCount = Math.min(18, Math.floor((width * height) / 60000));
     for (let i = 0; i < shapeCount; i++) {
       shapes.push(new Shape());
     }
 
-    const gridSpacing = 48;
+    // Tăng grid spacing từ 48 lên 76 để giảm hơn 60% số chấm vẽ canvas
+    const gridSpacing = 76;
     let animationFrameId;
 
     const animate = () => {
       ctx.clearRect(0, 0, width, height);
 
       ctx.fillStyle = '#97CADB';
+      const maxGridDistSq = 10000; // 100^2
       for (let x = gridSpacing / 2; x < width; x += gridSpacing) {
         for (let y = gridSpacing / 2; y < height; y += gridSpacing) {
           const dx = mouse.x - x;
           const dy = mouse.y - y;
-          const dist = Math.hypot(dx, dy);
+          const distSq = dx * dx + dy * dy;
           let dotRadius = 1;
 
-          if (dist < 100) {
+          if (distSq < maxGridDistSq) {
+            const dist = Math.sqrt(distSq);
             dotRadius = 1 + (100 - dist) * 0.025;
           }
 
@@ -146,10 +155,13 @@ export default function DynamicBackground() {
 
       ctx.strokeStyle = 'rgba(1, 138, 190, 0.15)';
       ctx.lineWidth = 1;
+      const maxConnectSq = 25600; // 160^2
       for (let i = 0; i < shapes.length; i++) {
         for (let j = i + 1; j < shapes.length; j++) {
-          const dist = Math.hypot(shapes[i].x - shapes[j].x, shapes[i].y - shapes[j].y);
-          if (dist < 160) {
+          const dx = shapes[i].x - shapes[j].x;
+          const dy = shapes[i].y - shapes[j].y;
+          const distSq = dx * dx + dy * dy;
+          if (distSq < maxConnectSq) {
             ctx.beginPath();
             ctx.moveTo(shapes[i].x, shapes[i].y);
             ctx.lineTo(shapes[j].x, shapes[j].y);
@@ -161,9 +173,12 @@ export default function DynamicBackground() {
       if (mouse.x !== -1000) {
         ctx.strokeStyle = 'rgba(151, 202, 219, 0.25)';
         ctx.lineWidth = 1.2;
+        const maxMouseConnectSq = 19600; // 140^2
         shapes.forEach((shape) => {
-          const dist = Math.hypot(mouse.x - shape.x, mouse.y - shape.y);
-          if (dist < 140) {
+          const dx = mouse.x - shape.x;
+          const dy = mouse.y - shape.y;
+          const distSq = dx * dx + dy * dy;
+          if (distSq < maxMouseConnectSq) {
             ctx.beginPath();
             ctx.moveTo(mouse.x, mouse.y);
             ctx.lineTo(shape.x, shape.y);
@@ -186,6 +201,7 @@ export default function DynamicBackground() {
       window.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseleave', handleMouseLeave);
       window.removeEventListener('resize', handleResize);
+      clearTimeout(resizeTimeout);
       cancelAnimationFrame(animationFrameId);
     };
   }, []);
@@ -203,6 +219,7 @@ export default function DynamicBackground() {
         zIndex: -1,
         pointerEvents: 'none',
         opacity: 0.45,
+        willChange: 'transform' // Gợi ý tăng tốc GPU cho canvas
       }}
     />
   );
