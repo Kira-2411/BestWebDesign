@@ -113,6 +113,7 @@ export default function Header() {
     { href: '/universities', label: 'Trường ĐH' },
     { href: '/majors', label: 'Ngành học' },
     { href: '/map', label: 'Bản đồ' },
+    { href: '/chat', label: 'Trò chuyện' },
   ];
 
   return (
