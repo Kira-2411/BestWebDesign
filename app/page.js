@@ -653,7 +653,7 @@ export default function Home() {
                         </div>
 
                         {loading ? (
-                          <div className="results-list">
+                          <div className="results-list" data-lenis-prevent>
                             <div className="matrix-loading-status" style={{ fontFamily: 'var(--font-display)', fontWeight: 700, marginBottom: '12px', color: 'var(--spruce-green)' }}>
                               🤖 Đang chạy ma trận tuyển sinh từ Supabase...
                             </div>
@@ -668,7 +668,7 @@ export default function Home() {
                             </div>
                           </div>
                         ) : filteredMatches.length > 0 ? (
-                          <div className="results-list">
+                          <div className="results-list" data-lenis-prevent>
                             {filteredMatches.map((match, i) => (
                               <article className="uni-card fade-in" key={match.id}>
                                 <div className="uni-card__rank">#{i + 1}</div>
