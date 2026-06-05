@@ -2,6 +2,8 @@ import '../css/style.css';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import DynamicBackground from '../components/DynamicBackground';
+import AosInit from '../components/AosInit';
+import SmoothScrollProvider from '../components/SmoothScrollProvider';
 
 export const metadata = {
   title: 'UniMatch — Hack số phận, chọn đúng trường',
@@ -26,10 +28,13 @@ export default function RootLayout({ children }) {
         />
       </head>
       <body>
-        <DynamicBackground />
-        <Header />
-        {children}
-        <Footer />
+        <SmoothScrollProvider>
+          <AosInit />
+          <DynamicBackground />
+          <Header />
+          {children}
+          <Footer />
+        </SmoothScrollProvider>
       </body>
     </html>
   );

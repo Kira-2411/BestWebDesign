@@ -268,7 +268,7 @@ export default function UniversitiesPage() {
       {toastMessage && <div className="toast show">{toastMessage}</div>}
 
       <section className="page-header">
-        <div className="container">
+        <div className="container" data-aos="fade-up">
           <span className="section-badge">Tra cứu</span>
           <h1>Danh sách trường ĐH</h1>
           <p>Lọc, so sánh, bookmark trường học lưu vào Supabase Cloud.</p>
@@ -342,7 +342,12 @@ export default function UniversitiesPage() {
               {visibleUnis.map((uni, index) => {
                 const isBookmarked = bookmarked.includes(uni.id);
                 return (
-                  <article className="university-card is-compact fade-in" key={uni.id} style={{ animationDelay: `${Math.min(index, 8) * 0.04}s` }}>
+                  <article 
+                    className="university-card is-compact" 
+                    key={uni.id} 
+                    data-aos="fade-up" 
+                    data-aos-delay={Math.min(index % 3, 3) * 100}
+                  >
                     <div className="card-top">
                       <div className={`logo-box ${uni.type === "private" ? "private" : ""}`}>{uni.short_name}</div>
                       <span className={`pill ${uni.type}`}>{uni.type === 'public' ? 'Công lập' : 'Tư thục'}</span>

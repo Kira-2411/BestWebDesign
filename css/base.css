@@ -29,7 +29,27 @@
 }
 
 html {
-  scroll-behavior: smooth;
+  scroll-behavior: initial !important;
+}
+
+html.lenis, html.lenis-pure {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+.lenis.lenis-scrolling iframe {
+  pointer-events: none;
 }
 
 body {
@@ -96,10 +116,7 @@ p {
 .stagger-3 { transition-delay: 0.3s; }
 .stagger-4 { transition-delay: 0.4s; }
 
-/* Smooth scrolling and tactile interactions */
-html {
-  scroll-behavior: smooth;
-}
+/* Lenis smooth scrolling helper applied above */
 
 .click-ripple {
   position: absolute;

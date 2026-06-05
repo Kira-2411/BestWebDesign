@@ -247,7 +247,7 @@ export default function MajorsPage() {
         <div className="container">
           <div className="major-top-panel">
             {/* Bộ lọc */}
-            <aside className="filter-panel major-top-panel__filter">
+            <aside className="filter-panel major-top-panel__filter" data-aos="fade-right">
               <div className="field">
                 <label htmlFor="search">Tìm ngành</label>
                 <input
@@ -309,7 +309,7 @@ export default function MajorsPage() {
             </aside>
 
             {/* Quiz định hướng */}
-            <div className="major-top-panel__quiz">
+            <div className="major-top-panel__quiz" data-aos="fade-left">
               <div className="quiz-box" id="quizBox">
                 {quizIndex < QUIZ_QUESTIONS.length ? (
                   <>
@@ -359,7 +359,7 @@ export default function MajorsPage() {
 
           {/* Catalog Ngành học */}
           <div className="majors-catalog">
-            <div className="section-header">
+            <div className="section-header" data-aos="fade-up">
               <div>
                 <span className="section-badge">Catalog</span>
                 <h2>Danh sách ngành học</h2>
@@ -386,7 +386,12 @@ export default function MajorsPage() {
                   const cat = CATEGORIES.find((c) => c.id === major.category);
                   const isBookmarked = bookmarked.includes(major.id);
                   return (
-                    <article className="major-card fade-in" key={major.id} style={{ animationDelay: `${Math.min(index, 8) * 0.04}s` }}>
+                    <article 
+                      className="major-card" 
+                      key={major.id} 
+                      data-aos="fade-up" 
+                      data-aos-delay={Math.min(index % 3, 3) * 100}
+                    >
                       <div className="card-top">
                         <span className="pill" style={{ color: cat?.color || '#000', background: '#f8fafc' }}>
                           {cat?.name || major.category}
@@ -432,7 +437,7 @@ export default function MajorsPage() {
 
           {/* Xu hướng */}
           <div className="majors-trending">
-            <div className="section-header" style={{ marginTop: '48px' }}>
+            <div className="section-header" style={{ marginTop: '48px' }} data-aos="fade-up">
               <div>
                 <span className="section-badge">Trending</span>
                 <h2>Nhóm nổi bật</h2>
@@ -440,7 +445,12 @@ export default function MajorsPage() {
             </div>
             <div className="trend-grid">
               {TRENDS.map((item, i) => (
-                <article className="tool-card trend-card" key={i}>
+                <article 
+                  className="tool-card trend-card" 
+                  key={i}
+                  data-aos="fade-up"
+                  data-aos-delay={(i + 1) * 100}
+                >
                   <span className="pill fit">{item.tag}</span>
                   <h3>{item.title}</h3>
                   <p>{item.text}</p>
