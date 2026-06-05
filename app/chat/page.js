@@ -31,6 +31,7 @@ export default function ChatPage() {
   const [toastMessage, setToastMessage] = useState('');
 
   const messagesEndRef = useRef(null);
+  const messagesContainerRef = useRef(null);
   const chatInputRef = useRef(null);
 
   const showToast = (msg) => {
@@ -39,7 +40,12 @@ export default function ChatPage() {
   };
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (messagesContainerRef.current) {
+      messagesContainerRef.current.scrollTo({
+        top: messagesContainerRef.current.scrollHeight,
+        behavior: 'smooth'
+      });
+    }
   };
 
   // 1. Kiểm tra trạng thái đăng nhập
@@ -673,7 +679,7 @@ export default function ChatPage() {
           </div>
 
           {/* Hộp cuộn tin nhắn */}
-          <div className="chat-messages-container" data-lenis-prevent>
+          <div ref={messagesContainerRef} className="chat-messages-container" data-lenis-prevent>
             {messages.length > 0 ? (
               messages.map((msg) => {
                 const isMe = currentUser && msg.sender_id === currentUser.id;
