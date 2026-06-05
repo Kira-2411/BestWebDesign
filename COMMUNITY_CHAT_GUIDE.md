@@ -64,78 +64,101 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-public-key
 Vào **Supabase Dashboard -> SQL Editor -> New Query**, copy và chạy đoạn mã tạo bảng sau:
 
 ```sql
--- 1. Tạo bảng lưu trữ tin nhắn chat
-CREATE TABLE IF NOT EXISTS public.community_messages (
+-- XUAN DUC SƯA DATA BÁE ==================
+-- lam box chat _crypto_aead_det_decrypt
+-- 1. Bảng phòng chat (Dùng cho cả chat 1-1 hoặc chat nhóm)
+
+create table community_messages (
+  id uuid default gen_random_uuid() primary key,
+  sender_id uuid references auth.users(id) on delete set null,
+  sender_email text not null, -- Lưu email hoặc tên để hiển thị nhanh
+  content text not null,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+// phan quyen
+-- 1. Bật tính năng Row Level Security (RLS) trên bảng community_messages
+alter table public.community_messages enable row level security;
+-- 2. Cho phép mọi người (kể cả khách chưa đăng nhập) đọc danh sách tin nhắn
+create policy "Allow public read-only access"
+on public.community_messages
+for select
+using (true);
+-- 3. Chỉ cho phép tài khoản đã đăng nhập được quyền gửi tin nhắn mới
+create policy "Allow authenticated users to insert"
+on public.community_messages
+for insert
+to authenticated
+with check (auth.uid() = sender_id);
+
+
+-- kich hoat real time
+alter publication supabase_realtime add table community_messages;
+
+
+
+-- êdit database
+
+-- SQL Script nâng cấp tính năng Chat Cộng Đồng cho UniMatch
+-- Thực hiện: Mở Supabase Dashboard -> SQL Editor -> Tạo query mới -> Dán toàn bộ mã này vào và nhấn Run.
+
+-- 1. Nâng cấp bảng community_messages hiện có nếu thiếu các cột cần thiết
+CREATE TABLE IF NOT EXISTS community_messages (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     sender_id UUID NOT NULL,
     sender_email TEXT NOT NULL,
-    sender_name TEXT,
-    sender_avatar TEXT,
     content TEXT NOT NULL,
-    reply_to_id UUID REFERENCES public.community_messages(id) ON DELETE SET NULL,
-    is_edited BOOLEAN DEFAULT FALSE,
-    is_deleted BOOLEAN DEFAULT FALSE,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
--- 2. Tạo bảng lưu trữ cảm xúc (Reaction) của tin nhắn
-CREATE TABLE IF NOT EXISTS public.community_reactions (
+ALTER TABLE community_messages 
+ADD COLUMN IF NOT EXISTS sender_name TEXT,
+ADD COLUMN IF NOT EXISTS sender_avatar TEXT,
+ADD COLUMN IF NOT EXISTS reply_to_id UUID REFERENCES community_messages(id) ON DELETE SET NULL,
+ADD COLUMN IF NOT EXISTS is_edited BOOLEAN DEFAULT false,
+ADD COLUMN IF NOT EXISTS is_deleted BOOLEAN DEFAULT false,
+ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL;
+
+-- 2. Tạo bảng lưu trữ cảm xúc (reactions)
+CREATE TABLE IF NOT EXISTS community_reactions (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    message_id UUID NOT NULL REFERENCES public.community_messages(id) ON DELETE CASCADE,
+    message_id UUID NOT NULL REFERENCES community_messages(id) ON DELETE CASCADE,
     user_id UUID NOT NULL,
-    reaction_type TEXT NOT NULL,
+    reaction_type TEXT NOT NULL, -- 'like' (👍), 'love' (❤️), 'haha' (😂), 'wow' (😮), 'sad' (😢)
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
-    CONSTRAINT unique_message_user_reaction UNIQUE (message_id, user_id, reaction_type)
+    UNIQUE (message_id, user_id, reaction_type)
 );
 
--- 3. Tắt RLS để tất cả mọi người có thể nhắn tin tự do (hoặc cấu hình RLS tuỳ nhu cầu dự án)
-ALTER TABLE public.community_messages DISABLE ROW LEVEL SECURITY;
-ALTER TABLE public.community_reactions DISABLE ROW LEVEL SECURITY;
-```
+-- 3. Vô hiệu hóa RLS để đảm bảo client có thể đọc ghi trực tiếp dễ dàng
+ALTER TABLE community_messages DISABLE ROW LEVEL SECURITY;
+ALTER TABLE community_reactions DISABLE ROW LEVEL SECURITY;
 
-### Bước 3: Kích hoạt Realtime cho các bảng
-Trong **SQL Editor**, chạy lệnh sau để kích hoạt tính năng phát tin nhắn thời gian thực:
+-- KICH HOAT REAALTIME
+alter publication supabase_realtime add table community_messages;
+alter publication supabase_realtime add table community_reactions;
 
-```sql
--- Kiểm tra và tạo publication phát sóng Realtime
-DO $$
-BEGIN
-  IF NOT EXISTS (SELECT 1 FROM pg_publication WHERE pubname = 'supabase_realtime') THEN
-    CREATE PUBLICATION supabase_realtime;
-  END IF;
-END $$;
-
--- Đăng ký sạch sẽ các bảng vào Realtime
-ALTER PUBLICATION supabase_realtime DROP TABLE IF EXISTS community_messages, community_reactions;
-ALTER PUBLICATION supabase_realtime ADD TABLE community_messages, community_reactions;
-```
-
-### Bước 4: Tạo kho lưu trữ ảnh đính kèm (Storage Bucket)
-Trong **SQL Editor**, chạy lệnh sau để tạo và phân quyền cho thư mục tải ảnh:
-
-```sql
--- 1. Tạo bucket lưu trữ ảnh công khai tên 'chat-attachments'
+--- === ẢNH GỬI ẢNH ====
+-- 1. Tạo bucket lưu trữ ảnh tên là 'chat-attachments' dạng công khai (Public)
 insert into storage.buckets (id, name, public)
 values ('chat-attachments', 'chat-attachments', true)
 on conflict (id) do nothing;
 
--- 2. Xoá chính sách bảo mật cũ nếu có tránh xung đột
+-- 2. Xóa chính sách bảo mật cũ nếu có để tránh xung đột
 drop policy if exists "Allow public uploads" on storage.objects;
 drop policy if exists "Allow public read" on storage.objects;
 
--- 3. Cấp quyền upload ảnh cho mọi người dùng
+-- 3. Tạo chính sách RLS cho phép tải ảnh lên (Insert) công khai vào bucket này
 create policy "Allow public uploads"
 on storage.objects for insert
 to public
 with check (bucket_id = 'chat-attachments');
 
--- 4. Cấp quyền xem ảnh cho mọi người dùng
+-- 4. Tạo chính sách RLS cho phép xem ảnh (Select) công khai từ bucket này
 create policy "Allow public read"
 on storage.objects for select
 to public
 using (bucket_id = 'chat-attachments');
-```
+
 
 ### Bước 5: Chạy dự án
 Mở terminal tại thư mục dự án và chạy các lệnh:
