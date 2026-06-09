@@ -276,7 +276,7 @@ export default function Home() {
         playNode(659.25, now + 0.06, 0.14);
         playNode(783.99, now + 0.12, 0.2);
       }
-    } catch (e) {}
+    } catch (e) { }
   };
 
   const showToast = (msg) => {
@@ -430,8 +430,6 @@ export default function Home() {
               <span>CHỌN ĐÚNG TRƯỜNG.</span>
             </h1>
             <p className="hero-lead">
-              Không phải danh sách trường vô tri — UniMatch chia nguyện vọng theo tỷ lệ 30/50/20: an toàn, chuẩn, và
-              dream. Dữ liệu thực, lý do rõ ràng, kết nối trực tiếp đến Supabase Database.
             </p>
             <div className="hero-actions">
               <a className="btn-primary" href="#match">Bắt đầu ngay</a>
@@ -467,7 +465,6 @@ export default function Home() {
         <div className="container">
           <div className="section-header" data-aos="fade-up">
             <div>
-              <span className="section-badge">Smart Match</span>
               <h2>Tạo chiến lược nguyện vọng</h2>
               <p>4 bước — kết quả hiện trong Aspiration Matrix với 3 khối bất đối xứng 30/50/20.</p>
             </div>
@@ -478,7 +475,7 @@ export default function Home() {
               <div className={`step-tab ${step === 1 ? 'is-active' : ''} ${step > 1 ? 'is-done' : ''}`}><span className="step-number">1</span> Tổ hợp</div>
               <div className={`step-tab ${step === 2 ? 'is-active' : ''} ${step > 2 ? 'is-done' : ''}`}><span className="step-number">2</span> Điểm</div>
               <div className={`step-tab ${step === 3 ? 'is-active' : ''} ${step > 3 ? 'is-done' : ''}`}><span className="step-number">3</span> Lọc</div>
-              <div className={`step-tab ${step === 4 ? 'is-active' : ''}`}><span className="step-number">4</span> Matrix</div>
+              <div className={`step-tab ${step === 4 ? 'is-active' : ''}`}><span className="step-number">4</span> Kết quả</div>
             </div>
 
             <form onSubmit={handleSubmit}>
@@ -598,7 +595,7 @@ export default function Home() {
                   </div>
                   <div className="form-actions">
                     <button className="btn-ghost" type="button" onClick={handlePrevStep}>← Quay lại</button>
-                    <button className="btn-primary" type="submit">Chạy Matrix →</button>
+                    <button className="btn-primary" type="submit">Kết quả →</button>
                   </div>
                 </section>
               )}
@@ -655,7 +652,7 @@ export default function Home() {
                         {loading ? (
                           <div className="results-list" data-lenis-prevent>
                             <div className="matrix-loading-status" style={{ fontFamily: 'var(--font-display)', fontWeight: 700, marginBottom: '12px', color: 'var(--spruce-green)' }}>
-                              🤖 Đang chạy ma trận tuyển sinh từ Supabase...
+                              🤖 Đang chạy...
                             </div>
                             <div className="skeleton-result-card">
                               <div className="skeleton-line" style={{ width: '25%', height: '10px' }}></div>
@@ -751,7 +748,7 @@ export default function Home() {
         <div className="container">
           <div className="section-header" data-aos="fade-up">
             <div>
-              <span className="section-badge">Vì sao khác?</span>
+
               <h2>Không corporate. Có cơ sở.</h2>
               <p>Giải thích điểm, xu hướng chuẩn, học phí — để bạn tự tin điền NV thay vì đoán mò.</p>
             </div>
