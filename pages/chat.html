@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trò chuyện nhóm — UniMatch</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body class="page-chat">
+  <header class="site-header">
+    <a class="brand" href="../index.html"><span class="brand-mark">U</span> UNIMATCH</a>
+    <nav class="site-nav">
+      <a href="../index.html">Trang chủ</a>
+      <a href="universities.html">Trường ĐH</a>
+      <a href="majors.html">Ngành học</a>
+      <a href="map.html">Bản đồ</a>
+      <a class="is-active" href="chat.html">Trò chuyện</a>
+      <a href="../index.html#about">Giới thiệu</a>
+    </nav>
+    <div id="headerAuthZone" class="header-auth-zone" style="display: flex; align-items: center; gap: 12px; margin-left: auto;">
+      <!-- Nút Đăng nhập Google hoặc Thông tin User sẽ được render ở đây -->
+    </div>
+    <button class="nav-toggle" aria-label="Mở menu"><span></span><span></span><span></span></button>
+  </header>
+
+  <main>
+    <section class="page-header page-header--compact" data-aos="fade-down">
+      <div class="container">
+        <span class="section-badge">Kết nối</span>
+        <h1>Trò chuyện cộng đồng</h1>
+        <p>Phòng thảo luận trực tuyến thời gian thực dành cho Gen-Z và học sinh THPT.</p>
+      </div>
+    </section>
+
+    <section class="section chat-page">
+      <div class="container">
+        <div class="chat-page-layout" data-aos="fade-up">
+          <!-- CỘT TRÁI: HỘP CHAT CHÍNH -->
+          <div class="chat-main-card">
+            <div class="chat-header-bar">
+              <span class="chat-header-title">💬 Phòng trò chuyện chung</span>
+              <div style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; font-weight: bold;">
+                <span class="chat-online-dot online" style="width: 8px; height: 8px;"></span>
+                <span id="onlineCountText">0 người đang online</span>
+              </div>
+            </div>
+
+            <!-- Khung chứa tin nhắn -->
+            <div id="chatMessages" class="chat-messages-container" data-lenis-prevent>
+              <div id="chatLoading" style="text-align: center; padding: 40px; color: #888;">
+                🤖 Đang tải lịch sử tin nhắn...
+              </div>
+            </div>
+
+            <!-- Chỉ báo đang gõ tin nhắn -->
+            <div id="typingIndicatorBar" class="chat-typing-indicator-bar" style="visibility: hidden;">
+              <!-- Nội dung sẽ tự động cập nhật bởi JS -->
+            </div>
+
+            <!-- Bảng xem trước Reply -->
+            <div id="replyPreviewBar" class="chat-reply-preview-bar" style="display: none; margin: 0 20px 10px 20px;">
+              <span id="replyPreviewText" class="chat-reply-preview-text"></span>
+              <button id="closeReplyPreviewBtn" class="chat-reply-preview-close" type="button">✕</button>
+            </div>
+
+            <!-- Bảng xem trước Edit -->
+            <div id="editPreviewBar" class="chat-edit-preview-bar" style="display: none; margin: 0 20px 10px 20px;">
+              <span id="editPreviewText" class="chat-reply-preview-text">✏️ Đang chỉnh sửa tin nhắn...</span>
+              <button id="closeEditPreviewBtn" class="chat-reply-preview-close" type="button">✕</button>
+            </div>
+
+            <!-- Form nhập tin nhắn -->
+            <div id="chatInputArea" class="chat-input-bar">
+              <!-- Hiển thị form nếu đã đăng nhập -->
+              <form id="chatForm" class="chat-input-row" style="display: none;">
+                <div class="chat-input-actions" style="position: relative;">
+                  <!-- Emoji Button -->
+                  <button id="emojiPickerBtn" type="button" class="chat-action-btn" title="Thêm emoji">😊</button>
+                  
+                  <!-- Emoji picker popover -->
+                  <div id="emojiPopover" class="emoji-picker-dropdown" style="display: none;">
+                    <div class="emoji-grid">
+                      <button type="button" class="emoji-grid-btn" data-emoji="👍">👍</button>
+                      <button type="button" class="emoji-grid-btn" data-emoji="❤️">❤️</button>
+                      <button type="button" class="emoji-grid-btn" data-emoji="😂">😂</button>
+                      <button type="button" class="emoji-grid-btn" data-emoji="😮">😮</button>
+                      <button type="button" class="emoji-grid-btn" data-emoji="😢">😢</button>
+                      <button type="button" class="emoji-grid-btn" data-emoji="🔥">🔥</button>
+                      <button type="button" class="emoji-grid-btn" data-emoji="🎉">🎉</button>
+                      <button type="button" class="emoji-grid-btn" data-emoji="👀">👀</button>
+                      <button type="button" class="emoji-grid-btn" data-emoji="✨">✨</button>
+                      <button type="button" class="emoji-grid-btn" data-emoji="💯">💯</button>
+                      <button type="button" class="emoji-grid-btn" data-emoji="🚀">🚀</button>
+                      <button type="button" class="emoji-grid-btn" data-emoji="🎓">🎓</button>
+                    </div>
+                  </div>
+
+                  <!-- Attach File Button -->
+                  <button id="imageAttachBtn" type="button" class="chat-action-btn" title="Gửi ảnh">📎</button>
+                  <input type="file" id="fileInput" accept="image/*" style="display: none;">
+
+                  <!-- Attach image URL popover -->
+                  <div id="imageUrlPopover" class="image-upload-popover" style="display: none;">
+                    <span style="font-size:0.75rem; font-weight:700;">Nhập link ảnh trực tiếp:</span>
+                    <div style="display:flex; gap:6px;">
+                      <input type="url" id="imageUrlInput" placeholder="https://example.com/image.png" style="flex:1;">
+                      <button type="button" id="imageUrlSubmitBtn" class="mini-btn" style="padding:4px 8px; font-size:0.75rem;">OK</button>
+                    </div>
+                    <div style="border-top:1px solid #ddd; padding-top:6px; text-align:center; font-size:0.7rem; color:#666;">
+                      Hoặc click nút 📎 để tải ảnh lên
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Input box -->
+                <textarea id="chatInput" class="chat-input-textarea" placeholder="Nhập tin nhắn... (Ctrl+V để dán nhanh ảnh)" rows="1" required></textarea>
+
+                <button id="sendBtn" class="mini-btn" type="submit" style="background:#FFD23F; border:3px solid var(--ink); box-shadow:3px 3px 0 var(--ink); padding:0 20px; height:42px; font-family:var(--font-display); font-weight:800; text-transform:uppercase; cursor:pointer;">
+                  Gửi ⚡
+                </button>
+              </form>
+
+              <!-- Hiển thị nhắc nhở nếu chưa đăng nhập -->
+              <div id="authPrompt" style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 12px; gap: 8px;">
+                <p style="margin: 0; font-family: var(--font-display); font-weight: 700; color: #666; font-size: 0.95rem;">
+                  🔒 Đăng nhập bằng Google để gửi tin nhắn
+                </p>
+                <button id="loginBtn" class="mini-btn auth-btn" style="background: #FFD23F; cursor: pointer; padding: 6px 16px;">
+                  Đăng nhập Google
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- CỘT PHẢI: USER ONLINE -->
+          <div class="chat-online-panel">
+            <h3>👥 Đang hoạt động</h3>
+            <div id="onlineUsersList" class="chat-online-list">
+              <!-- Sẽ render tự động qua JS -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-container">
+      <div class="footer-brand-section" data-aos="fade-up">
+        <a class="brand" href="../index.html">
+          <span class="brand-mark">U</span>
+          UNIMATCH
+        </a>
+        <p class="footer-tagline">Hack số phận, chọn đúng trường. Hệ thống tư vấn nguyện vọng thông minh theo chiến lược 30/50/20 dành cho Gen-Z.</p>
+        <div class="footer-socials">
+          <a href="https://web.facebook.com/nguyen.xuan.uc.982793" class="social-btn" target="_blank" rel="noopener">Facebook</a>
+          <a href="https://github.com/xuanduc-nxd" class="social-btn" target="_blank" rel="noopener">GitHub</a>
+        </div>
+      </div>
+      
+      <div class="footer-nav-column" data-aos="fade-up" data-aos-delay="100">
+        <h4>Khám Phá</h4>
+        <a href="../index.html">Trang chủ</a>
+        <a href="universities.html">Trường ĐH</a>
+        <a href="majors.html">Ngành học</a>
+        <a href="map.html">Bản đồ trường</a>
+        <a href="chat.html">Trò chuyện</a>
+      </div>
+      
+      <div class="footer-nav-column" data-aos="fade-up" data-aos-delay="200">
+        <h4>Dữ Liệu & Code</h4>
+        <a href="https://github.com/xuanduc-nxd" target="_blank" rel="noopener">GitHub Author</a>
+        <a href="../docs/Thiet_ke_de_tai_UniMatch.doc" download>Tài liệu đề án</a>
+        <a href="https://maps.vietmap.vn/console/register" target="_blank" rel="noopener">VietMap API</a>
+      </div>
+      
+      <div class="footer-nav-column" data-aos="fade-up" data-aos-delay="300">
+        <h4>Liên Hệ & Support</h4>
+        <a href="mailto:contact@unimatch.vn">contact@unimatch.vn</a>
+        <a href="../index.html#about">Về chúng tôi</a>
+        <a href="#">Điều khoản dịch vụ</a>
+      </div>
+    </div>
+    
+    <div class="container footer-bottom">
+      <p class="copyright">&copy; 2026 UniMatch. All rights reserved. Designed for Gen-Z.</p>
+    </div>
+  </footer>
+
+  <!-- Modern Gen-Z Logout Overlay -->
+  <div id="logoutOverlay" class="logout-overlay" style="display: none;">
+    <div class="logout-content">
+      <div class="logout-glitch">⚡ UNIMATCH ⚡</div>
+      <div class="logout-text">Đang đăng xuất...</div>
+      <div class="logout-emoji">🧹👋🛸</div>
+      <div class="logout-sub">Đang dọn dẹp bộ nhớ & bảo mật phiên</div>
+    </div>
+  </div>
+
+  <!-- CDN scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../js/supabase-config.js"></script>
+  <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+  <script src="../js/app.js"></script>
+  <script src="../js/chat-page.js"></script>
+</body>
+</html>
