@@ -400,7 +400,7 @@ async function main() {
   const chunkSize = 200;
   for (let i = 0; i < generatedCutoffs.length; i += chunkSize) {
     const chunk = generatedCutoffs.slice(i, i + chunkSize);
-    const { error: cutoffErr } = await supabase.from('cutoffs').upsert(chunk);
+    const { error: cutoffErr } = await supabase.from('cutoffs').upsert(chunk, { onConflict: 'university_id,major_id,year' });
     if (cutoffErr) {
       console.error(`❌ Lỗi ghi chunk cutoffs (${i} - ${i + chunk.length}):`, cutoffErr.message);
       process.exit(1);

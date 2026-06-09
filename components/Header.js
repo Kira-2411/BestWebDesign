@@ -114,6 +114,7 @@ export default function Header() {
     { href: '/majors', label: 'Ngành học' },
     { href: '/map', label: 'Bản đồ' },
     { href: '/chat', label: 'Trò chuyện' },
+    { href: '/news', label: 'Tin tức' },
   ];
 
   return (
@@ -139,7 +140,6 @@ export default function Header() {
                 </Link>
               );
             })}
-            <a href="/#about" onClick={() => setIsOpen(false)}>Giới thiệu</a>
           </nav>
 
           {/* Khối đăng nhập / Quản lý tài khoản */}

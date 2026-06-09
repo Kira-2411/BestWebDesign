@@ -66,7 +66,7 @@ export default function Footer() {
         <div className="footer-nav-column">
           <h4>Liên Hệ & Support</h4>
           <a href="mailto:contact@unimatch.vn">contact@unimatch.vn</a>
-          <a href="/#about">Về chúng tôi</a>
+          <Link href="/news">Tin tức & Sự kiện</Link>
           <a href="#">Điều khoản dịch vụ</a>
         </div>
       </div>
