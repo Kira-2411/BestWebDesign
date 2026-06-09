@@ -35,3 +35,114 @@
   border: var(--border);
   border-radius: 8px;
 }
+
+/* News Page Styles */
+.news-page {
+  padding-bottom: 60px;
+}
+
+.news-layout-container {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+.news-post-card:hover {
+  transform: translate3d(-4px, -4px, 0);
+  box-shadow: 10px 10px 0 #000 !important;
+}
+
+@media (max-width: 992px) {
+  .news-layout-container {
+    grid-template-columns: 1fr !important;
+  }
+  .news-post-card {
+    grid-template-columns: 1fr !important;
+  }
+  .news-image-wrap {
+    height: 180px !important;
+  }
+}
+
+/* Brutalist Floating Stickers */
+.brutal-sticker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  font-size: 2.2rem;
+  background: var(--bg-color);
+  border: 3px solid #000;
+  border-radius: 12px;
+  box-shadow: 4px 4px 0 #000;
+  cursor: pointer;
+  transform: rotate(var(--rotate-deg));
+  user-select: none;
+  animation: floatSticker 3s ease-in-out infinite;
+  transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.2s, background-color 0.2s;
+  position: absolute;
+}
+
+.brutal-sticker:hover {
+  transform: scale(1.2) rotate(calc(var(--rotate-deg) * 1.5)) !important;
+  box-shadow: 6px 6px 0 #000;
+  background: var(--mustard) !important;
+}
+
+.sticker-tooltip {
+  position: absolute;
+  bottom: -36px;
+  left: 50%;
+  transform: translateX(-50%) scale(0);
+  background: #000;
+  color: #fff;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 0.75rem;
+  padding: 4px 8px;
+  border-radius: 6px;
+  white-space: nowrap;
+  pointer-events: none;
+  transition: transform 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow: 2px 2px 0 var(--mustard);
+  z-index: 50;
+}
+
+.brutal-sticker:hover .sticker-tooltip {
+  transform: translateX(-50%) scale(1);
+}
+
+@keyframes floatSticker {
+  0%, 100% {
+    transform: translateY(0) rotate(var(--rotate-deg));
+  }
+  50% {
+    transform: translateY(-12px) rotate(calc(var(--rotate-deg) + 3deg));
+  }
+}
+
+@media (max-width: 1250px) {
+  .brutal-sticker {
+    display: none !important;
+  }
+}
+
+/* Custom scrollbar for Facebook feed wrapper to match Neo-Brutalism style */
+.facebook-timeline-wrapper::-webkit-scrollbar {
+  width: 12px;
+}
+.facebook-timeline-wrapper::-webkit-scrollbar-track {
+  background: #fff;
+  border-left: 3px solid #000;
+}
+.facebook-timeline-wrapper::-webkit-scrollbar-thumb {
+  background: #FFD23F; /* Màu vàng cá tính */
+  border: 2.5px solid #000;
+  border-radius: 0;
+  box-shadow: none;
+}
+.facebook-timeline-wrapper::-webkit-scrollbar-thumb:hover {
+  background: #FF5964; /* Đổi màu khi hover */
+}
