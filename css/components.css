@@ -855,15 +855,15 @@
 .map-canvas-wrap {
   display: flex;
   flex-direction: column;
-  min-height: 0;
+  min-height: 450px;
   height: 100%;
   align-self: stretch;
 }
 
 #map {
-  flex: 1;
+  flex: 1 1 auto;
   width: 100%;
-  min-height: 0;
+  min-height: 450px;
   height: 100%;
   border: var(--border);
   border-radius: var(--radius);
@@ -874,6 +874,7 @@
 #map .vietmapgl-map {
   width: 100% !important;
   height: 100% !important;
+  min-height: 450px;
 }
 
 #map .vietmapgl-canvas-container,

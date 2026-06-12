@@ -271,7 +271,7 @@ export default function UniversitiesPage() {
         <div className="container" data-aos="fade-up">
           <span className="section-badge">Tra cứu</span>
           <h1>Danh sách trường ĐH</h1>
-          <p>Lọc, so sánh, bookmark trường học lưu vào Supabase Cloud.</p>
+          <p>Tổng hợp các trường đại học công lập và trung lập trên khắp Việt Nam </p>
 
           <div className="toolbar" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px', marginTop: '20px' }}>
             <input
