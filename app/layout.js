@@ -2,6 +2,7 @@ import '../css/style.css';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import DynamicBackground from '../components/DynamicBackground';
+import CursorFollower from '../components/CursorFollower';
 import AosInit from '../components/AosInit';
 import SmoothScrollProvider from '../components/SmoothScrollProvider';
 
@@ -31,6 +32,7 @@ export default function RootLayout({ children }) {
         <SmoothScrollProvider>
           <AosInit />
           <DynamicBackground />
+          <CursorFollower />
           <Header />
           {children}
           <Footer />

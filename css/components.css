@@ -1875,3 +1875,81 @@ body.is-exiting {
   font-size: 0.8rem;
   width: 100%;
 }
+
+/* --- Custom cursor (dot + ring) — site-wide --- */
+
+body.has-cursor-follower,
+body.has-cursor-follower * {
+  cursor: none !important;
+}
+
+body.has-cursor-follower--text input,
+body.has-cursor-follower--text textarea,
+body.has-cursor-follower--text select {
+  cursor: text !important;
+}
+
+.cursor-dot,
+.cursor-ring {
+  position: fixed;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0;
+  will-change: transform, opacity;
+  transition: opacity 0.2s ease;
+}
+
+.cursor-dot {
+  width: 8px;
+  height: 8px;
+  margin-left: -4px;
+  margin-top: -4px;
+  background: var(--ink);
+  border-radius: 50%;
+}
+
+.cursor-ring {
+  width: 40px;
+  height: 40px;
+  margin-left: -20px;
+  margin-top: -20px;
+  border: 3px solid var(--ink);
+  border-radius: 50%;
+  background: rgba(255, 210, 63, 0.35);
+  box-shadow: 4px 4px 0 var(--ink);
+  transition: width 0.2s ease, height 0.2s ease, margin 0.2s ease, background 0.2s ease, opacity 0.2s ease;
+}
+
+.cursor-ring--hover {
+  width: 56px;
+  height: 56px;
+  margin-left: -28px;
+  margin-top: -28px;
+  background: rgba(56, 176, 0, 0.4);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cursor-dot,
+  .cursor-ring {
+    display: none !important;
+  }
+
+  body.has-cursor-follower,
+  body.has-cursor-follower * {
+    cursor: auto !important;
+  }
+}
+
+@media (hover: none), (pointer: coarse) {
+  .cursor-dot,
+  .cursor-ring {
+    display: none !important;
+  }
+
+  body.has-cursor-follower,
+  body.has-cursor-follower * {
+    cursor: auto !important;
+  }
+}

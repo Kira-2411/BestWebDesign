@@ -754,8 +754,7 @@ export default function Home() {
         <div className="container">
           <div className="section-header" data-aos="fade-up">
             <div>
-
-              <h2>Không corporate. Có cơ sở.</h2>
+              <h2>Không đoán mơ hồ. Có cơ sở.</h2>
               <p>Giải thích điểm, xu hướng chuẩn, học phí — để bạn tự tin điền NV thay vì đoán mò.</p>
             </div>
           </div>
