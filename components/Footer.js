@@ -43,7 +43,7 @@ export default function Footer() {
         </div>
 
         <div className="footer-nav-column">
-          <h4>Dữ Liệu & Code</h4>
+          <h4>Trang tham khảo </h4>
           <a
             href="https://github.com/xuanduc-nxd"
             target="_blank"
@@ -51,16 +51,10 @@ export default function Footer() {
           >
             GitHub Author
           </a>
-          <a href="/docs/Thiet_ke_de_tai_UniMatch.doc" download>
+          <a href="..." download>
             Tài liệu đề án
           </a>
-          <a
-            href="https://maps.vietmap.vn/console/register"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            VietMap API
-          </a>
+       
         </div>
 
         <div className="footer-nav-column">
@@ -72,9 +66,6 @@ export default function Footer() {
       </div>
 
       <div className="container footer-bottom">
-        <p className="copyright">
-          &copy; 2026 UniMatch. All rights reserved. Designed for Gen-Z.
-        </p>
       </div>
     </footer>
   );

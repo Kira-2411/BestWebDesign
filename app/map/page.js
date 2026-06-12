@@ -25,10 +25,10 @@ function MapContent() {
   const mapContainerRef = useRef(null);
   const mapRef = useRef(null);
   const markersRef = useRef({});
-  const styleLoadedRef = useRef(false);
 
   const [universities, setUniversities] = useState([]);
   const [hasMapKey, setHasMapKey] = useState(false);
+  const [mapStyleUrl, setMapStyleUrl] = useState(null);
   const [loading, setLoading] = useState(true);
   const [scriptLoaded, setScriptLoaded] = useState(false);
   const [mapReady, setMapReady] = useState(false);
@@ -48,10 +48,13 @@ function MapContent() {
         // Fetch universities
         const uniRes = await fetch('/api/universities');
         const uniData = await uniRes.json();
-        // Kiểm tra cấu hình VietMap API Key trên backend
-        const keyRes = await fetch('/api/map-key');
-        const keyData = await keyRes.json();
-        setHasMapKey(keyData.hasKey);
+
+        // Lấy URL style VietMap từ server
+        const styleRes = await fetch('/api/map-style-url');
+        const styleData = await styleRes.json();
+        setHasMapKey(styleData.hasKey);
+        setMapStyleUrl(styleData.styleUrl || null);
+
 
         // Load plan từ localStorage
         const savedPlan = localStorage.getItem('unimatch_strategy_plan');
@@ -79,82 +82,58 @@ function MapContent() {
 
   // 2. Khởi tạo Bản đồ sau khi Script và Dữ liệu sẵn sàng
   useEffect(() => {
-    if (!scriptLoaded || loading || !hasMapKey || !window.vietmapgl || !mapContainerRef.current) return;
+    if (!scriptLoaded || loading || !hasMapKey || !mapStyleUrl || !window.vietmapgl || mapRef.current || !mapContainerRef.current) return;
 
+    let map;
     let cancelled = false;
 
-    setMapError(null);
-    styleLoadedRef.current = false;
-
-    const initMap = async () => {
-      try {
-        const styleRes = await fetch('/api/map/style/tm', { cache: 'no-store' });
-        if (!styleRes.ok) {
-          throw new Error(`Style HTTP ${styleRes.status}`);
-        }
-        const style = await styleRes.json();
-        if (cancelled || !mapContainerRef.current) return;
-
-        const map = new window.vietmapgl.Map({
-          container: mapContainerRef.current,
-          style,
-          center: [108.2022, 16.0544],
-          zoom: 6,
-          minZoom: 5,
-          maxZoom: 15,
-          transformRequest: (url) => {
-            if (url.startsWith('https://maps.vietmap.vn/')) {
-              const path = url
-                .replace('https://maps.vietmap.vn/', '')
-                .replace(/([?&])apikey=[^&]+/g, '')
-                .replace(/[?&]$/, '');
-              return { url: `${window.location.origin}/api/map/proxy/${path}` };
-            }
-            return { url };
-          },
-        });
-
-        if (cancelled) {
-          map.remove();
-          return;
-        }
-
-        mapRef.current = map;
-        map.addControl(new window.vietmapgl.NavigationControl(), 'top-right');
-
-        map.on('load', () => {
-          if (cancelled) return;
-          styleLoadedRef.current = true;
-          setMapReady(true);
-          setMapError(null);
-          requestAnimationFrame(() => map.resize());
-        });
-
-        map.on('error', (e) => {
-          console.warn('VietMap resource warning:', e?.error?.message || e);
-        });
-      } catch (e) {
-        if (!cancelled) {
-          console.error('Không khởi tạo được VietMap GL JS:', e);
-          setMapError('Không tải được bản đồ VietMap. Kiểm tra VIETMAP_API_KEY và kết nối mạng.');
-        }
-      }
+    const handleResize = () => {
+      map?.resize();
     };
 
-    initMap();
+    try {
+      map = new window.vietmapgl.Map({
+        container: mapContainerRef.current,
+        style: mapStyleUrl,
+        center: [108.2022, 16.0544],
+        zoom: 6,
+        minZoom: 5,
+        maxZoom: 18
+      });
+
+      map.addControl(new window.vietmapgl.NavigationControl(), 'top-right');
+
+      map.on('load', () => {
+        if (cancelled) return;
+        mapRef.current = map;
+        map.resize();
+        setMapError(null);
+        setMapReady(true);
+      });
+
+      map.on('error', (e) => {
+        if (cancelled) return;
+        const message = e?.error?.message || e?.message || 'Không tải được dữ liệu bản đồ.';
+        console.error('Lỗi bản đồ VietMap:', e);
+        setMapError(message);
+      });
+
+      window.addEventListener('resize', handleResize);
+    } catch (e) {
+      console.error('Không khởi tạo được VietMap GL JS:', e);
+      setMapError('Không khởi tạo được VietMap GL JS.');
+    }
 
     return () => {
       cancelled = true;
-      styleLoadedRef.current = false;
-      setMapReady(false);
-      Object.values(markersRef.current).forEach(({ marker }) => marker.remove());
-      markersRef.current = {};
-      if (mapRef.current) {
-        mapRef.current.remove();
+      window.removeEventListener('resize', handleResize);
+      if (map) {
+        map.remove();
         mapRef.current = null;
+        setMapReady(false);
       }
     };
-  }, [scriptLoaded, loading, hasMapKey]);
+  }, [scriptLoaded, loading, hasMapKey, mapStyleUrl]);
 
   // 3. Render Markers khi bản đồ sẵn sàng
   useEffect(() => {
@@ -387,7 +366,9 @@ function MapContent() {
               )}
             </aside>
 
-            <div className="map-canvas-wrap" data-lenis-prevent style={{ position: 'relative', height: '450px', minHeight: '450px', background: '#e2e8f0' }}>
+
+            <div className="map-canvas-wrap" style={{ position: 'relative', background: '#e2e8f0' }}>
+
               {!hasMapKey && !loading && (
                 <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.9)', padding: '20px', textAlign: 'center', zIndex: 10 }}>
                   <div>
@@ -396,15 +377,18 @@ function MapContent() {
                   </div>
                 </div>
               )}
-              {mapError && hasMapKey && !mapReady && (
-                <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.9)', padding: '20px', textAlign: 'center', zIndex: 10 }}>
+
+              {mapError && (
+                <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.92)', padding: '20px', textAlign: 'center', zIndex: 10 }}>
                   <div>
-                    <strong>Không hiển thị được bản đồ.</strong>
+                    <strong>Không tải được bản đồ VietMap.</strong>
                     <p style={{ margin: '8px 0' }}>{mapError}</p>
+                    <p style={{ margin: 0, fontSize: '14px' }}>Kiểm tra API key tại <a href="https://maps.vietmap.vn/console/register" target="_blank" rel="noopener noreferrer">maps.vietmap.vn</a>.</p>
                   </div>
                 </div>
               )}
-              <div id="map" ref={mapContainerRef} style={{ width: '100%', height: '100%' }} />
+              <div id="map" ref={mapContainerRef} />
+
             </div>
           </div>
         </div>

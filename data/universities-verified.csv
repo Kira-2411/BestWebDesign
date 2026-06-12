@@ -1,0 +1,9 @@
+university_id,name,short_name,type,city,region,website,students,majors_count,lat,lng,categories,source_url,verified_at
+hust,Đại học Bách Khoa Hà Nội,HUST,public,Hà Nội,north,https://hust.edu.vn,35000+,80+,21.0049,105.8455,cntt|kysu,https://hust.edu.vn,2026-06-01
+vnu,Đại học Quốc gia Hà Nội,VNU,public,Hà Nội,north,https://vnu.edu.vn,40000+,150+,21.0379,105.7824,cntt|kinhte|luat,https://vnu.edu.vn,2026-06-01
+neu,Đại học Kinh tế Quốc dân,NEU,public,Hà Nội,north,https://neu.edu.vn,20000+,30+,21.0003,105.8430,kinhte,https://neu.edu.vn,2026-06-01
+ftu,Đại học Ngoại thương,FTU,public,Hà Nội & TP.HCM,all,https://ftu.edu.vn,15000+,25+,21.0233,105.8056,kinhte|nn,https://ftu.edu.vn,2026-06-01
+ueh,Đại học Kinh tế TP.HCM,UEH,public,TP.HCM,south,https://ueh.edu.vn,20000+,28+,10.7818,106.6917,kinhte,https://ueh.edu.vn,2026-06-01
+hcmut,Đại học Bách Khoa TP.HCM,HCMUT,public,TP.HCM,south,https://hcmut.edu.vn,30000+,70+,10.7733,106.6597,cntt|kysu,https://hcmut.edu.vn,2026-06-01
+ump,Đại học Y Dược TP.HCM,UMP,public,TP.HCM,south,https://ump.edu.vn,10000+,20+,10.7562,106.6663,yte,https://ump.edu.vn,2026-06-01
+vku,Đại học Công nghệ Thông tin và Truyền thông Việt - Hàn,VKU,public,Đà Nẵng,central,https://vku.udn.vn,5000+,15+,15.9753,108.2533,cntt,https://vku.udn.vn,2026-06-01

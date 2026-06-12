@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { supabase } from '../lib/supabase';
+import AdmissionTimeline from '../components/AdmissionTimeline';
 
 const SUBJECT_GROUPS = {
   A00: ["Toán", "Vật lý", "Hóa học"],
@@ -722,17 +723,23 @@ export default function Home() {
                                 <p className="uni-card__school">{match.university.name} ({match.university.short_name || match.university.shortName}) · {match.university.city}</p>
                                 <div className="uni-card__metrics">
                                   <div className="metric">
-                                    <span className="tag tag--blue">Điểm chuẩn '25</span>
+                                    <span className="tag tag--blue">Điểm chuẩn {match.cutoffYear || '25'} ({match.combination})</span>
                                     <strong>{match.cutoff.toFixed(1)}</strong>
                                   </div>
                                   <div className="metric">
+                                    <span className="tag tag--green">Chênh lệch</span>
+                                    <strong style={{ color: match.delta >= 0 ? '#38B000' : '#ef4444' }}>
+                                      {match.delta >= 0 ? '+' : ''}{match.delta.toFixed(1)}
+                                    </strong>
+                                  </div>
+                                  <div className="metric">
                                     <span className="tag tag--green">Học phí</span>
-                                    <strong>{match.university.tuition} triệu/năm</strong>
+                                    <strong>{match.university.tuition ? `${match.university.tuition} triệu/năm` : '—'}</strong>
                                   </div>
                                 </div>
                                 <p className="uni-card__why">{match.reason}</p>
                                 <div className="uni-card__foot">
-                                  <span className="match-pct">{match.score}% match</span>
+                                  <span className="match-pct" title="Điểm xếp hạng gợi ý, không phải xác suất trúng tuyển">Ưu tiên #{match.score}</span>
                                   <div className="card-actions">
                                     <a className="mini-btn" href={match.university.website} target="_blank" rel="noopener noreferrer">Web</a>
                                     <Link className="mini-btn" href={`/map?university=${encodeURIComponent(match.university.id)}`}>Map</Link>
@@ -789,8 +796,7 @@ export default function Home() {
         <div className="container">
           <div className="section-header" data-aos="fade-up">
             <div>
-
-              <h2>Không corporate. Có cơ sở.</h2>
+              <h2>Không đoán mơ hồ. Có cơ sở.</h2>
               <p>Giải thích điểm, xu hướng chuẩn, học phí — để bạn tự tin điền NV thay vì đoán mò.</p>
             </div>
           </div>
@@ -813,6 +819,8 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      <AdmissionTimeline />
     </main>
   );
 }
