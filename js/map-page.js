@@ -10,19 +10,92 @@
   let activeFilter = "all";
   let recommendedIds = [];
   let mapReady = false;
+  let planRegion = "all";
   const MAP_BLOCK_HEIGHT_RATIO = 0.5;
+
+  const REGION_CENTERS = {
+    north: { city: "Hà Nội", lat: 21.0285, lng: 105.8342 },
+    central: { city: "Đà Nẵng", lat: 16.0544, lng: 108.2022 },
+    south: { city: "TP.HCM", lat: 10.8231, lng: 106.6297 }
+  };
+
+  const MULTI_CAMPUS_COORDS = {
+    rmit: {
+      north: { city: "Hà Nội", lat: 21.0318, lng: 105.7465 },
+      south: { city: "TP.HCM", lat: 10.73, lng: 106.6946 }
+    },
+    fptu: {
+      north: { city: "Hà Nội", lat: 21.0135, lng: 105.5273 },
+      central: { city: "Đà Nẵng", lat: 16.0544, lng: 108.214 },
+      south: { city: "TP.HCM", lat: 10.8411, lng: 106.8099 }
+    },
+    ftu: {
+      north: { city: "Hà Nội", lat: 21.0233, lng: 105.8056 },
+      south: { city: "TP.HCM", lat: 10.7772, lng: 106.6958 }
+    }
+  };
+
+  const REGION_KEYWORDS = {
+    north: ["hà nội", "hanoi", "thái nguyên", "nghệ an", "vinh", "bắc ninh", "hải phòng"],
+    central: ["đà nẵng", "huế", "khánh hòa", "nha trang", "quảng nam", "thanh hóa", "quy nhơn"],
+    south: ["hồ chí minh", "tp.hcm", "hcm", "cần thơ", "bình dương", "đồng nai", "vũng tàu", "long an"]
+  };
+
+  function isMultiCampusText(text) {
+    if (!text) return false;
+    const lower = text.toLowerCase();
+    return lower.includes("&") || lower.includes(" và ") || lower.includes("nhiều cơ sở") || lower.includes("toàn quốc");
+  }
+
+  function getMentionedRegions(text) {
+    if (!text) return [];
+    const lower = text.toLowerCase();
+    const regions = [];
+    Object.entries(REGION_KEYWORDS).forEach(([region, keywords]) => {
+      if (keywords.some((kw) => lower.includes(kw))) regions.push(region);
+    });
+    return regions;
+  }
+
+  function resolveUniversityCampus(uni, preferredRegion = "all") {
+    const cityText = [uni.city, uni.location, uni.name].filter(Boolean).join(" ");
+    const uniId = (uni.id || uni.shortName || "").toLowerCase();
+    const registry = MULTI_CAMPUS_COORDS[uniId] || {};
+    const mentioned = getMentionedRegions(cityText);
+    const isMulti = isMultiCampusText(cityText) || mentioned.length > 1 || uni.region === "all";
+
+    if (!isMulti) {
+      return { lat: uni.lat, lng: uni.lng, city: uni.city, region: uni.region };
+    }
+
+    if (preferredRegion && preferredRegion !== "all" && isMulti) {
+      const campus = registry[preferredRegion] || REGION_CENTERS[preferredRegion];
+      return { ...campus, region: preferredRegion };
+    }
+
+    const fallbackRegion = mentioned[0] || uni.region || "south";
+    const campus = registry[fallbackRegion] || REGION_CENTERS[fallbackRegion];
+    return { ...campus, region: fallbackRegion };
+  }
+
+  function applyCampusToUniversity(uni, preferredRegion = "all") {
+    const campus = resolveUniversityCampus(uni, preferredRegion);
+    return { ...uni, lat: campus.lat, lng: campus.lng, city: campus.city, campus_region: campus.region };
+  }
 
   function getVisibleUniversities() {
     const query = UI.$("#mapSearch").value.trim().toLowerCase();
-    return DATA.universities.filter((uni) => {
-      if (recommendedIds.length && !recommendedIds.includes(uni.id)) return false;
-      if (activeFilter !== "all" && uni.type !== activeFilter) return false;
-      if (query) {
-        const text = `${uni.name} ${uni.shortName} ${uni.city}`.toLowerCase();
-        if (!text.includes(query)) return false;
-      }
-      return true;
-    });
+    return DATA.universities
+      .filter((uni) => {
+        if (recommendedIds.length && !recommendedIds.includes(uni.id)) return false;
+        if (activeFilter !== "all" && uni.type !== activeFilter) return false;
+        if (query) {
+          const text = `${uni.name} ${uni.shortName} ${uni.city}`.toLowerCase();
+          if (!text.includes(query)) return false;
+        }
+        return true;
+      })
+      .map((uni) => markers[uni.id]?.uni || applyCampusToUniversity(uni, planRegion));
   }
 
   function resizeMap() {
@@ -124,9 +197,10 @@
       mapReady = true;
 
       DATA.universities.forEach((uni) => {
-        const marker = new vietmapgl.Marker({ element: createMarkerElement(uni), anchor: "bottom" })
-          .setLngLat([uni.lng, uni.lat]);
-        markers[uni.id] = { marker, uni };
+        const resolved = applyCampusToUniversity(uni, planRegion);
+        const marker = new vietmapgl.Marker({ element: createMarkerElement(resolved), anchor: "bottom" })
+          .setLngLat([resolved.lng, resolved.lat]);
+        markers[uni.id] = { marker, uni: resolved };
       });
 
       render();
@@ -215,8 +289,9 @@
   }
 
   function selectUniversity(id, fly) {
-    const uni = DATA.universities.find((item) => item.id === id);
-    if (!uni || !mapReady) return;
+    const base = DATA.universities.find((item) => item.id === id);
+    if (!base || !mapReady) return;
+    const uni = markers[id]?.uni || applyCampusToUniversity(base, planRegion);
 
     UI.$all(".map-list-item").forEach((item) => {
       item.classList.toggle("is-active", item.dataset.id === id);
@@ -257,6 +332,7 @@
   function loadPlan() {
     const plan = UI.getPlan();
     if (!plan?.matches?.length) return;
+    planRegion = plan.profile?.region || "all";
     recommendedIds = Array.from(new Set(plan.matches.slice(0, 10).map((match) => match.university.id)));
     UI.$("#recommendBox").style.display = "block";
     UI.$("#recommendText").textContent = `Đang hiển thị ${recommendedIds.length} trường từ kết quả tư vấn ${plan.totalScore.toFixed(1)} điểm.`;
@@ -265,8 +341,8 @@
 
   document.addEventListener("DOMContentLoaded", () => {
     syncMapViewport();
-    initMap();
     loadPlan();
+    initMap();
 
     UI.$all("[data-filter]").forEach((button) => {
       button.addEventListener("click", () => {

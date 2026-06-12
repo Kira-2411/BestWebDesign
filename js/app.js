@@ -69,6 +69,94 @@
     return { id: "reach", label: "Thử thách" };
   }
 
+  const REGION_KEYWORDS = {
+    north: ["hà nội", "hanoi", "thái nguyên", "nghệ an", "vinh", "bắc ninh", "hải phòng"],
+    central: ["đà nẵng", "huế", "khánh hòa", "nha trang", "quảng nam", "thanh hóa", "quy nhơn"],
+    south: ["hồ chí minh", "tp.hcm", "hcm", "cần thơ", "bình dương", "đồng nai", "vũng tàu", "long an"]
+  };
+
+  function inferRegionFromText(text) {
+    if (!text) return null;
+    const lower = text.toLowerCase();
+    if (REGION_KEYWORDS.north.some((kw) => lower.includes(kw))) return "north";
+    if (REGION_KEYWORDS.central.some((kw) => lower.includes(kw))) return "central";
+    if (REGION_KEYWORDS.south.some((kw) => lower.includes(kw))) return "south";
+    return null;
+  }
+
+  function isMultiCampus(text) {
+    if (!text) return false;
+    const lower = text.toLowerCase();
+    return lower.includes("&") || lower.includes(" và ") || lower.includes("nhiều cơ sở") || lower.includes("toàn quốc");
+  }
+
+  function matchesRegion(university, selectedRegion) {
+    if (!selectedRegion || selectedRegion === "all") return true;
+
+    const cityText = [university.city, university.location, university.name].filter(Boolean).join(" ");
+
+    if (isMultiCampus(cityText)) {
+      const keywords = REGION_KEYWORDS[selectedRegion] || [];
+      return keywords.some((kw) => cityText.toLowerCase().includes(kw));
+    }
+
+    const resolved = (university.region && university.region !== "all")
+      ? university.region
+      : inferRegionFromText(university.city) || inferRegionFromText(university.location);
+
+    return resolved === selectedRegion;
+  }
+
+  function matchesSchoolType(university, schoolType) {
+    if (!schoolType || schoolType === "all") return true;
+    return university.type === schoolType;
+  }
+
+  const REGION_CENTERS = {
+    north: { city: "Hà Nội", lat: 21.0285, lng: 105.8342 },
+    central: { city: "Đà Nẵng", lat: 16.0544, lng: 108.2022 },
+    south: { city: "TP.HCM", lat: 10.8231, lng: 106.6297 }
+  };
+
+  const MULTI_CAMPUS_COORDS = {
+    rmit: {
+      north: { city: "Hà Nội", lat: 21.0318, lng: 105.7465 },
+      south: { city: "TP.HCM", lat: 10.73, lng: 106.6946 }
+    },
+    fptu: {
+      north: { city: "Hà Nội", lat: 21.0135, lng: 105.5273 },
+      central: { city: "Đà Nẵng", lat: 16.0544, lng: 108.214 },
+      south: { city: "TP.HCM", lat: 10.8411, lng: 106.8099 }
+    },
+    ftu: {
+      north: { city: "Hà Nội", lat: 21.0233, lng: 105.8056 },
+      south: { city: "TP.HCM", lat: 10.7772, lng: 106.6958 }
+    }
+  };
+
+  function getMentionedRegions(text) {
+    if (!text) return [];
+    const lower = text.toLowerCase();
+    const regions = [];
+    if (REGION_KEYWORDS.north.some((kw) => lower.includes(kw))) regions.push("north");
+    if (REGION_KEYWORDS.central.some((kw) => lower.includes(kw))) regions.push("central");
+    if (REGION_KEYWORDS.south.some((kw) => lower.includes(kw))) regions.push("south");
+    return regions;
+  }
+
+  function applyCampusToUniversity(uni, preferredRegion = "all") {
+    const cityText = [uni.city, uni.location, uni.name].filter(Boolean).join(" ");
+    const uniId = (uni.id || uni.shortName || "").toLowerCase();
+    const registry = MULTI_CAMPUS_COORDS[uniId] || {};
+    const mentioned = getMentionedRegions(cityText);
+    const isMulti = isMultiCampus(cityText) || mentioned.length > 1 || uni.region === "all";
+
+    if (!isMulti || !preferredRegion || preferredRegion === "all") return uni;
+
+    const campus = registry[preferredRegion] || REGION_CENTERS[preferredRegion];
+    return { ...uni, lat: campus.lat, lng: campus.lng, city: campus.city };
+  }
+
   function categoryMatchBonus(major, interests) {
     if (!interests.length) return 8;
     return interests.includes(major.category) ? 22 : 0;
@@ -76,8 +164,7 @@
 
   function regionBonus(university, region) {
     if (!region || region === "all") return 8;
-    if (university.region === "all") return 7;
-    return university.region === region ? 12 : -4;
+    return matchesRegion(university, region) ? 12 : -4;
   }
 
   function tuitionBonus(university, maxTuition) {
@@ -85,6 +172,48 @@
     if (university.tuition <= maxTuition) return 12;
     const over = university.tuition - maxTuition;
     return Math.max(-12, 4 - over * 0.8);
+  }
+
+  function applyStrategyQuota(matches, limit = 18) {
+    if (!matches.length) return [];
+
+    const buckets = { safe: [], fit: [], reach: [] };
+    matches.forEach((match) => {
+      if (buckets[match.risk.id]) buckets[match.risk.id].push(match);
+    });
+
+    const sortByScore = (a, b) => b.score - a.score || b.delta - a.delta;
+    buckets.safe.sort(sortByScore);
+    buckets.fit.sort(sortByScore);
+    buckets.reach.sort(sortByScore);
+
+    const targetSafe = Math.round(limit * 0.3);
+    const targetFit = Math.round(limit * 0.5);
+    const targetReach = Math.max(0, limit - targetSafe - targetFit);
+
+    const picked = {
+      safe: buckets.safe.slice(0, targetSafe),
+      fit: buckets.fit.slice(0, targetFit),
+      reach: buckets.reach.slice(0, targetReach)
+    };
+
+    const unpicked = {
+      safe: buckets.safe.slice(picked.safe.length),
+      fit: buckets.fit.slice(picked.fit.length),
+      reach: buckets.reach.slice(picked.reach.length)
+    };
+
+    let remaining = limit - picked.safe.length - picked.fit.length - picked.reach.length;
+    const fillOrder = ["fit", "safe", "reach"];
+
+    fillOrder.forEach((tier) => {
+      while (remaining > 0 && unpicked[tier].length > 0) {
+        picked[tier].push(unpicked[tier].shift());
+        remaining -= 1;
+      }
+    });
+
+    return [...picked.safe, ...picked.fit, ...picked.reach];
   }
 
   function calculateMatches(profile) {
@@ -96,9 +225,10 @@
         const major = DATA.getMajor(majorId);
         if (!major) return;
         if (!major.combos.includes(profile.combination)) return;
-        
-        // Lọc theo khu vực nếu người dùng có chọn cụ thể
-        if (profile.region !== "all" && university.region !== "all" && university.region !== profile.region) return;
+        if (profile.interests.length > 0 && !profile.interests.includes(major.category)) return;
+        if (!matchesRegion(university, profile.region)) return;
+        if (!matchesSchoolType(university, profile.schoolType)) return;
+        if (profile.maxTuition > 0 && university.tuition > profile.maxTuition) return;
 
         const cutoff = cutoffs[2025] || cutoffs[2024] || cutoffs[2023];
         const delta = totalScore - cutoff;
@@ -113,9 +243,11 @@
         score += trendPenalty;
         score = Math.max(1, Math.min(99, Math.round(score)));
 
+        const universityForResult = applyCampusToUniversity(university, profile.region);
+
         matches.push({
           id: `${university.id}-${major.id}`,
-          university,
+          university: universityForResult,
           major,
           cutoff,
           cutoffs,
@@ -128,9 +260,10 @@
       });
     });
 
-    return matches
-      .sort((a, b) => b.score - a.score || b.delta - a.delta)
-      .slice(0, 18);
+    return applyStrategyQuota(
+      matches.sort((a, b) => b.score - a.score || b.delta - a.delta),
+      18
+    );
   }
 
   function buildReason(profile, university, major, delta, risk, trend) {
@@ -212,11 +345,10 @@
     const listEl = $("#resultsList");
     if (!listEl) return;
 
-    const safeMatches = matches.filter((m) => m.risk.id === "safe");
-    const empty = '<div class="empty-state">Không có trường gợi ý phù hợp (An toàn).</div>';
+    const empty = '<div class="empty-state">Không có trường gợi ý phù hợp cho bộ lọc này. Thử nới khu vực, loại trường hoặc học phí.</div>';
 
-    listEl.innerHTML = safeMatches.length
-      ? safeMatches.map((m, i) => renderResultCard(m, i)).join("")
+    listEl.innerHTML = matches.length
+      ? matches.map((m, i) => renderResultCard(m, i)).join("")
       : empty;
 
     if (typeof AOS !== "undefined") {
@@ -241,7 +373,9 @@
         <div class="summary-item"><span>Tổ hợp</span><strong>${plan.profile.combination}</strong></div>
         <div class="summary-item"><span>Tổng điểm</span><strong>${plan.totalScore.toFixed(2)}</strong></div>
         <div class="summary-item"><span>Khu vực</span><strong>${regionLabel(plan.profile.region)}</strong></div>
-        <div class="summary-item"><span>Số trường gợi ý (An toàn)</span><strong>${counts.safe || 0}</strong></div>
+        <div class="summary-item"><span>An toàn 🟢</span><strong>${counts.safe || 0}</strong></div>
+        <div class="summary-item"><span>Phù hợp 🟡</span><strong>${counts.fit || 0}</strong></div>
+        <div class="summary-item"><span>Thử thách 🔴</span><strong>${counts.reach || 0}</strong></div>
       </div>
     `;
   }
@@ -378,10 +512,7 @@
       if (!validateStep(3)) return;
 
       const profile = getProfile();
-      let matches = calculateMatches(profile);
-      if (profile.schoolType !== "all") {
-        matches = matches.filter((item) => item.university.type === profile.schoolType);
-      }
+      const matches = calculateMatches(profile);
 
       const totalScore = Object.values(profile.scores).reduce((sum, value) => sum + Number(value || 0), 0);
       const plan = {

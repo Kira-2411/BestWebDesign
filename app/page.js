@@ -91,7 +91,7 @@ export default function Home() {
     if (savedPlan) {
       try {
         const parsed = JSON.parse(savedPlan);
-        if (parsed && parsed.matches) {
+        if (parsed && Array.isArray(parsed.matches) && parsed.matches.length > 0) {
           setResults(parsed);
           setCombination(parsed.profile.combination || '');
           setScores(parsed.profile.scores || {});
@@ -159,7 +159,7 @@ export default function Home() {
           finalDraft = dbData.formDraft || null;
           finalPlan = dbData.strategyPlan || null;
 
-          if (finalPlan) {
+          if (finalPlan && Array.isArray(finalPlan.matches) && finalPlan.matches.length > 0) {
             localStorage.setItem('unimatch_strategy_plan', JSON.stringify(finalPlan));
             localStorage.removeItem('unimatch_form_draft');
             setResults(finalPlan);
@@ -170,6 +170,21 @@ export default function Home() {
             setSchoolType(finalPlan.profile.schoolType || 'all');
             setMaxTuition(finalPlan.profile.maxTuition || '');
             setStep(4);
+          } else if (finalPlan) {
+            localStorage.removeItem('unimatch_strategy_plan');
+            setResults(null);
+            if (finalDraft) {
+              localStorage.setItem('unimatch_form_draft', JSON.stringify(finalDraft));
+              setCombination(finalDraft.profile?.combination || '');
+              setScores(finalDraft.profile?.scores || {});
+              setInterests(finalDraft.profile?.interests || []);
+              setRegion(finalDraft.profile?.region || 'all');
+              setSchoolType(finalDraft.profile?.schoolType || 'all');
+              setMaxTuition(finalDraft.profile?.maxTuition || '');
+              setStep(finalDraft.step || 3);
+            } else {
+              setStep(1);
+            }
           } else if (finalDraft) {
             localStorage.setItem('unimatch_form_draft', JSON.stringify(finalDraft));
             localStorage.removeItem('unimatch_strategy_plan');
@@ -353,6 +368,20 @@ export default function Home() {
         })
       });
       const data = await response.json();
+
+      if (!response.ok || data.error) {
+        showToast(data.error || 'Không thể tính toán kết quả. Thử lại sau.');
+        setStep(3);
+        return;
+      }
+
+      if (!data.matches || data.matches.length === 0) {
+        showToast('Không tìm thấy trường phù hợp. Hãy thử nới bộ lọc (khu vực, loại trường, học phí) hoặc chọn thêm lĩnh vực quan tâm.');
+        setResults(null);
+        setStep(3);
+        return;
+      }
+
       setResults(data);
       localStorage.setItem('unimatch_strategy_plan', JSON.stringify(data));
       localStorage.removeItem('unimatch_form_draft');
@@ -404,16 +433,18 @@ export default function Home() {
 
   const totalScore = Object.values(scores).reduce((sum, val) => sum + Number(val || 0), 0);
 
-  // Lọc kết quả theo Tab (An toàn / Phù hợp / Thử thách) để sửa Bug 1
-  const filteredMatches = results?.matches
-    ? results.matches.filter(m => activeTab === 'all' || m.risk.id === activeTab)
-    : [];
+  const displayMatches = Array.isArray(results?.matches) ? results.matches : [];
+
+  // Lọc kết quả theo Tab (An toàn / Phù hợp / Thử thách)
+  const filteredMatches = displayMatches.filter(
+    (m) => activeTab === 'all' || m.risk?.id === activeTab
+  );
 
   // Đếm số lượng của từng nhóm nguyện vọng trong kết quả
-  const counts = results?.matches?.reduce((acc, m) => {
-    acc[m.risk.id] = (acc[m.risk.id] || 0) + 1;
+  const counts = displayMatches.reduce((acc, m) => {
+    if (m.risk?.id) acc[m.risk.id] = (acc[m.risk.id] || 0) + 1;
     return acc;
-  }, { safe: 0, fit: 0, reach: 0 }) || { safe: 0, fit: 0, reach: 0 };
+  }, { safe: 0, fit: 0, reach: 0 });
 
   return (
     <main>
@@ -621,7 +652,7 @@ export default function Home() {
                             onClick={() => setActiveTab('all')}
                             style={{ background: activeTab === 'all' ? '#018ABE' : '#fff', color: activeTab === 'all' ? '#fff' : '#000' }}
                           >
-                            🚀 Tất cả ({results?.matches?.length || 0})
+                            🚀 Tất cả ({displayMatches.length})
                           </button>
                           <button
                             type="button"
@@ -688,7 +719,7 @@ export default function Home() {
                                     {match.risk.label}
                                   </span>
                                 </h4>
-                                <p className="uni-card__school">{match.university.name} ({match.university.short_name}) · {match.university.city}</p>
+                                <p className="uni-card__school">{match.university.name} ({match.university.short_name || match.university.shortName}) · {match.university.city}</p>
                                 <div className="uni-card__metrics">
                                   <div className="metric">
                                     <span className="tag tag--blue">Điểm chuẩn '25</span>
@@ -711,7 +742,17 @@ export default function Home() {
                             ))}
                           </div>
                         ) : (
-                          <div className="empty-state">Không có trường gợi ý phù hợp cho bộ lọc này.</div>
+                          <div className="empty-state">
+                            <p>Không có trường gợi ý phù hợp cho bộ lọc hiện tại.</p>
+                            <p style={{ marginTop: '8px', fontSize: '0.9rem' }}>
+                              Đang lọc: {region === 'all' ? 'Toàn quốc' : region === 'north' ? 'Miền Bắc' : region === 'central' ? 'Miền Trung' : 'Miền Nam'}
+                              {' · '}{schoolType === 'all' ? 'Mọi loại trường' : schoolType === 'public' ? 'Công lập' : 'Tư thục'}
+                              {maxTuition ? ` · Học phí ≤ ${maxTuition} triệu` : ''}
+                            </p>
+                            <button className="btn-secondary" type="button" style={{ marginTop: '12px' }} onClick={() => setStep(3)}>
+                              Chỉnh sửa bộ lọc
+                            </button>
+                          </div>
                         )}
                       </div>
                     </div>

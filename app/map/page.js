@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import Script from 'next/script';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
+import { applyCampusToUniversity } from '../../lib/match-utils';
 
 const CATEGORIES = [
   { id: "cntt", name: "Công nghệ thông tin", color: "#006d9c" },
@@ -37,6 +38,7 @@ function MapContent() {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState('all'); // 'all', 'public', 'private'
   const [recommendedIds, setRecommendedIds] = useState([]);
+  const [planRegion, setPlanRegion] = useState('all');
   const [selectedUni, setSelectedUni] = useState(null);
 
   // 1. Fetch data & config
@@ -46,8 +48,6 @@ function MapContent() {
         // Fetch universities
         const uniRes = await fetch('/api/universities');
         const uniData = await uniRes.json();
-        setUniversities(uniData);
-
         // Kiểm tra cấu hình VietMap API Key trên backend
         const keyRes = await fetch('/api/map-key');
         const keyData = await keyRes.json();
@@ -55,13 +55,19 @@ function MapContent() {
 
         // Load plan từ localStorage
         const savedPlan = localStorage.getItem('unimatch_strategy_plan');
+        let regionFromPlan = 'all';
         if (savedPlan) {
           const parsed = JSON.parse(savedPlan);
+          regionFromPlan = parsed?.profile?.region || 'all';
           if (parsed && parsed.matches) {
             const ids = Array.from(new Set(parsed.matches.slice(0, 10).map((m) => m.university.id)));
             setRecommendedIds(ids);
           }
         }
+        setPlanRegion(regionFromPlan);
+
+        const mappedUnis = (uniData || []).map((uni) => applyCampusToUniversity(uni, regionFromPlan));
+        setUniversities(mappedUnis);
       } catch (err) {
         console.error("Lỗi khởi tạo bản đồ:", err);
       } finally {
@@ -193,7 +199,7 @@ function MapContent() {
     } else {
       fitMapBounds(universities);
     }
-  }, [mapReady, universities]);
+  }, [mapReady, universities, searchParams]);
 
   // 4. Lọc hiển thị Markers trên bản đồ theo bộ lọc tìm kiếm
   const getVisibleUnis = () => {
