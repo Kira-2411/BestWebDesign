@@ -7,6 +7,8 @@
     "build": "next build",
     "start": "next start",
     "seed": "node scripts/seed-supabase.js",
+    "validate:data": "node scripts/validate-verified-data.js",
+    "import:data": "node scripts/import-verified-data.js",
     "setup": "npm install"
   },
   "dependencies": {

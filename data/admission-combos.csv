@@ -1,0 +1,30 @@
+university_id,major_id,combination,subjects,source_url,verified_at
+hust,cntt,A00,Toán|Vật lý|Hóa học,https://hust.edu.vn,2026-06-01
+hust,cntt,A01,Toán|Vật lý|Tiếng Anh,https://hust.edu.vn,2026-06-01
+hust,cntt,D01,Toán|Ngữ văn|Tiếng Anh,https://hust.edu.vn,2026-06-01
+hust,kysu,A00,Toán|Vật lý|Hóa học,https://hust.edu.vn,2026-06-01
+hust,kysu,A01,Toán|Vật lý|Tiếng Anh,https://hust.edu.vn,2026-06-01
+vnu,cntt,A00,Toán|Vật lý|Hóa học,https://vnu.edu.vn,2026-06-01
+vnu,cntt,A01,Toán|Vật lý|Tiếng Anh,https://vnu.edu.vn,2026-06-01
+vnu,kinhte,A00,Toán|Vật lý|Hóa học,https://vnu.edu.vn,2026-06-01
+vnu,kinhte,D01,Toán|Ngữ văn|Tiếng Anh,https://vnu.edu.vn,2026-06-01
+vnu,luat,C00,Ngữ văn|Lịch sử|Địa lý,https://vnu.edu.vn,2026-06-01
+vnu,luat,D01,Toán|Ngữ văn|Tiếng Anh,https://vnu.edu.vn,2026-06-01
+neu,kinhte,A00,Toán|Vật lý|Hóa học,https://neu.edu.vn,2026-06-01
+neu,kinhte,A01,Toán|Vật lý|Tiếng Anh,https://neu.edu.vn,2026-06-01
+neu,marketing,A00,Toán|Vật lý|Hóa học,https://neu.edu.vn,2026-06-01
+neu,marketing,D01,Toán|Ngữ văn|Tiếng Anh,https://neu.edu.vn,2026-06-01
+ftu,kinhte,A00,Toán|Vật lý|Hóa học,https://ftu.edu.vn,2026-06-01
+ftu,kinhte,D01,Toán|Ngữ văn|Tiếng Anh,https://ftu.edu.vn,2026-06-01
+ftu,marketing,A01,Toán|Vật lý|Tiếng Anh,https://ftu.edu.vn,2026-06-01
+ueh,kinhte,A00,Toán|Vật lý|Hóa học,https://ueh.edu.vn,2026-06-01
+ueh,kinhte,D01,Toán|Ngữ văn|Tiếng Anh,https://ueh.edu.vn,2026-06-01
+ueh,marketing,A01,Toán|Vật lý|Tiếng Anh,https://ueh.edu.vn,2026-06-01
+hcmut,cntt,A00,Toán|Vật lý|Hóa học,https://hcmut.edu.vn,2026-06-01
+hcmut,cntt,A01,Toán|Vật lý|Tiếng Anh,https://hcmut.edu.vn,2026-06-01
+hcmut,kysu,A00,Toán|Vật lý|Hóa học,https://hcmut.edu.vn,2026-06-01
+ump,yte,B00,Toán|Hóa học|Sinh học,https://ump.edu.vn,2026-06-01
+ump,yte,A00,Toán|Vật lý|Hóa học,https://ump.edu.vn,2026-06-01
+ump,duoc,B00,Toán|Hóa học|Sinh học,https://ump.edu.vn,2026-06-01
+vku,cntt,A01,Toán|Vật lý|Tiếng Anh,https://vku.udn.vn,2026-06-01
+vku,cntt,D01,Toán|Ngữ văn|Tiếng Anh,https://vku.udn.vn,2026-06-01
