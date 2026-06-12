@@ -1,7 +1,8 @@
 import '../css/style.css';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
-import DynamicBackground from '../components/DynamicBackground';
+import VantaBirdsBackground from '../components/VantaBirdsBackground';
+import BackgroundAnimations from '../components/BackgroundAnimations';
 import CursorFollower from '../components/CursorFollower';
 import AosInit from '../components/AosInit';
 import SmoothScrollProvider from '../components/SmoothScrollProvider';
@@ -29,14 +30,17 @@ export default function RootLayout({ children }) {
         />
       </head>
       <body>
-        <SmoothScrollProvider>
-          <AosInit />
-          <DynamicBackground />
-          <CursorFollower />
-          <Header />
-          {children}
-          <Footer />
-        </SmoothScrollProvider>
+        <VantaBirdsBackground />
+        <BackgroundAnimations />
+        <div className="site-shell">
+          <SmoothScrollProvider>
+            <AosInit />
+            <CursorFollower />
+            <Header />
+            {children}
+            <Footer />
+          </SmoothScrollProvider>
+        </div>
       </body>
     </html>
   );

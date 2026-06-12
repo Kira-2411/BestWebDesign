@@ -59,10 +59,28 @@ body {
   font-size: 15px;
   line-height: 1.5;
   color: var(--ink);
-  background-color: var(--canvas);
+  background-color: #f2f6ff;
+}
+
+.site-shell {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
   background-image:
-    radial-gradient(circle at 1px 1px, rgba(0, 0, 0, 0.04) 1px, transparent 0);
+    radial-gradient(circle at 1px 1px, rgba(0, 0, 0, 0.025) 1px, transparent 0);
   background-size: 24px 24px;
+  animation: site-grid-shift 40s linear infinite;
+}
+
+@keyframes site-grid-shift {
+  0% { background-position: 0 0; }
+  100% { background-position: 24px 24px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .site-shell {
+    animation: none;
+  }
 }
 
 a {
