@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { supabase } from '../lib/supabase';
+import AdmissionTimeline from '../components/AdmissionTimeline';
 
 const SUBJECT_GROUPS = {
   A00: ["Toán", "Vật lý", "Hóa học"],
@@ -777,6 +778,8 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      <AdmissionTimeline />
     </main>
   );
 }

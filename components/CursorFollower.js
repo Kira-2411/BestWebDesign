@@ -66,8 +66,8 @@ export default function CursorFollower() {
 
     const animate = () => {
       if (activeRef.current) {
-        ringPos.current.x += (pos.current.x - ringPos.current.x) * 0.15;
-        ringPos.current.y += (pos.current.y - ringPos.current.y) * 0.15;
+        ringPos.current.x += (pos.current.x - ringPos.current.x) * 0.18;
+        ringPos.current.y += (pos.current.y - ringPos.current.y) * 0.18;
 
         if (dotRef.current) {
           dotRef.current.style.transform = `translate3d(${pos.current.x}px, ${pos.current.y}px, 0)`;
