@@ -43,18 +43,14 @@ export default function Footer() {
         </div>
 
         <div className="footer-nav-column">
-          <h4>Trang tham khảo </h4>
-          <a
-            href="https://github.com/xuanduc-nxd"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            GitHub Author
-          </a>
-          <a href="..." download>
-            Tài liệu đề án
-          </a>
-       
+          <h4>Thông tin </h4>
+          <p>Thuộc trường : Đại Học CNTT và TT Việt Hàn <br></br>
+          Sinh viên :  <br></br>
+          Nguyễn Xuân Đức <br></br>
+          Nguyễn Nguyễn Gia Bảo <br></br>
+          Đỗ Trung Hiếu <br></br>
+          Hoàng Tuấn Minh <br></br>
+          </p>
         </div>
 
         <div className="footer-nav-column">
