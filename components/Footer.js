@@ -44,7 +44,7 @@ export default function Footer() {
 
         <div className="footer-nav-column">
           <h4>Thông tin </h4>
-          <p>Thuộc trường : Đại Học CNTT và TT Việt Hàn <br></br>
+          <p style={{fontSize: '12px'}}>Thuộc trường : Đại Học CNTT và TT Việt Hàn <br></br>
           Sinh viên :  <br></br>
           Nguyễn Xuân Đức <br></br>
           Nguyễn Nguyễn Gia Bảo <br></br>
